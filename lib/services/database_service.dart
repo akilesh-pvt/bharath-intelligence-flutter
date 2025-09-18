@@ -4,10 +4,12 @@ import '../models/farmer_model.dart';
 import '../models/task_model.dart';
 import '../models/claim_model.dart';
 import '../utils/constants.dart';
+import '../config/supabase_config.dart';
 
 /// Database Service for Supabase Operations
 class DatabaseService {
-  static final SupabaseClient _supabase = Supabase.instance.client;
+  /// Get Supabase client instance
+  static SupabaseClient get _supabase => SupabaseConfig.client;
 
   // User Operations
   static Future<List<UserModel>> getUsers() async {
@@ -368,6 +370,21 @@ class DatabaseService {
       };
     } catch (e) {
       throw Exception('Failed to fetch dashboard stats: $e');
+    }
+  }
+
+  /// Get password hash from database for authentication
+  static Future<String?> getPasswordHash(String userId) async {
+    try {
+      final response = await _supabase
+          .from(AppConstants.profilesTable)
+          .select('password_hash')
+          .eq('id', userId)
+          .maybeSingle();
+      
+      return response?['password_hash'] as String?;
+    } catch (e) {
+      return null;
     }
   }
 }
